@@ -85,6 +85,9 @@ class GroupThreadManager {
             }
         }
     }
+    fun initGroupOffset(){
+        //todo 
+    }
 
     fun start(topicThreadGroupInfo: TopicThreadGroupInfo, topicOffsetInfo: TopicOffsetInfo) {
 

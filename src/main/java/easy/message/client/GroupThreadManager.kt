@@ -39,7 +39,7 @@ class GroupThreadManager {
             this.threads.add(this.createThread())
         }
         this.threads.forEach {
-            this.queue[topic] = ArrayBlockingQueue<Event>(1000)
+            this.queue[it.name] = ArrayBlockingQueue<Event>(1000)
         }
     }
 

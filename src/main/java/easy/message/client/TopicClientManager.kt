@@ -9,7 +9,7 @@ class TopicClientManager {
     private val applicationName: String
     private val eventRequestQueue = ArrayBlockingQueue<EventDataRequest>(500)
     //key=topic
-    private val groupThreadMap = ConcurrentHashMap<String, GroupThreadManager>()
+    private val groupThreadMap = ConcurrentHashMap<String, TopicGroupThreadManager>()
     private var updateGroupOffsetThreadExecutor = Executors.newSingleThreadScheduledExecutor()
     private var updateThreadExecutor = Executors.newSingleThreadScheduledExecutor()
     private val eventDataExecutor: List<ScheduledExecutorService>
@@ -28,7 +28,7 @@ class TopicClientManager {
      * 注册topic
      */
     fun regiserTopic(topic: String, eventHandler: IEventHandler) {
-        val groupThreadManager = GroupThreadManager(topic, 1, eventHandler, this)
+        val groupThreadManager = TopicGroupThreadManager(topic, 1, eventHandler, this)
         this.groupThreadMap.put(topic, groupThreadManager)
     }
 

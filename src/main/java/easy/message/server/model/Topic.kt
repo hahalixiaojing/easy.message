@@ -1,4 +1,4 @@
-package easy.message.server
+package easy.message.server.model
 
 class Topic {
 

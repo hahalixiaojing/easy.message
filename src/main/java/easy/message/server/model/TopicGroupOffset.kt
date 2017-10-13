@@ -1,4 +1,4 @@
-package easy.message.server
+package easy.message.server.model
 
 class TopicGroupOffset {
     constructor(topic: String, groupOffset: Map<Int, Long>) {

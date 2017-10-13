@@ -1,11 +1,15 @@
 package easy.message.server
 
+import easy.message.server.model.Topic
+import easy.message.server.model.TopicGroupOffset
+import easy.message.server.model.TopicGroupThread
+import easy.message.server.model.TopicThread
 import java.util.concurrent.ConcurrentHashMap
 
-class GroupMessageApplication {
+class ApplicationManager {
     //key = topic value=offset
     private val offsetManager = ConcurrentHashMap<String, GroupOffsetManager>()
-    private val groupThreadManager = ConcurrentHashMap<String, GroupThreadManager>()
+    private val groupThreadManager = ConcurrentHashMap<String, TopicGroupThreadManager>()
     private val applicationName: String
 
     constructor(applicationName: String, topicList: List<Topic>) {
@@ -18,7 +22,7 @@ class GroupMessageApplication {
                 groupOffsetManager.addOffset(i, 0)
             }
             this.offsetManager.put(topic.topicName, groupOffsetManager)
-            this.groupThreadManager.put(topic.topicName, GroupThreadManager(topic.topicName, topic.groupCount))
+            this.groupThreadManager.put(topic.topicName, TopicGroupThreadManager(topic.topicName, topic.groupCount))
         }
     }
 

@@ -1,16 +1,20 @@
 package easy.message.server
 
+import easy.message.server.model.Topic
+import easy.message.server.model.TopicGroupOffset
+import easy.message.server.model.TopicGroupThread
+import easy.message.server.model.TopicThread
 import java.util.concurrent.ConcurrentHashMap
 
-class GroupMessageServer {
+class ServerManager {
 
-    private val application = ConcurrentHashMap<String, GroupMessageApplication>()
+    private val application = ConcurrentHashMap<String, ApplicationManager>()
 
     /**
      * 添加应用
      */
     fun add(applicationName: String, topicList: ArrayList<Topic>) {
-        this.application[applicationName] = GroupMessageApplication(applicationName, topicList)
+        this.application[applicationName] = ApplicationManager(applicationName, topicList)
     }
 
 

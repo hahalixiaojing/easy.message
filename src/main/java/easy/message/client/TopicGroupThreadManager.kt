@@ -1,5 +1,6 @@
 package easy.message.client
 
+import com.alibaba.fastjson.JSON
 import easy.message.GroupThreadInfo
 import org.apache.commons.lang3.StringUtils
 import java.util.*
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class GroupThreadManager {
+class TopicGroupThreadManager {
     @Volatile
     private var staring = true
     private val topic: String
@@ -45,10 +46,11 @@ class GroupThreadManager {
         }
         sendGetEventThread.scheduleWithFixedDelay({
             this.threadGroup.forEach({
-                if (it.value.size > 0) {
+                if (it.value.size > 0 && this.queue[it.key]!!.size < 700) {
                     this.addRequestEventDataMessage(it.key)
                 }
             })
+
         }, 5, 3, TimeUnit.SECONDS)
     }
 

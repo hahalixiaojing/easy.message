@@ -12,7 +12,12 @@ class GroupMessageApplication {
         this.applicationName = applicationName
 
         for (topic in topicList) {
-            this.offsetManager.put(topic.topicName, GroupOffsetManager(topic.topicName))
+
+            val groupOffsetManager = GroupOffsetManager(topic.topicName)
+            for (i in 0 until topic.groupCount) {
+                groupOffsetManager.addOffset(i, 0)
+            }
+            this.offsetManager.put(topic.topicName, groupOffsetManager)
             this.groupThreadManager.put(topic.topicName, GroupThreadManager(topic.topicName, topic.groupCount))
         }
     }
@@ -29,7 +34,7 @@ class GroupMessageApplication {
     /**
      * 添加线程
      */
-    fun addThread(topicThreads: ArrayList<TopicThread>) {
+    fun addThread(topicThreads: List<TopicThread>) {
         topicThreads.forEach {
             this.groupThreadManager[it.topic]?.add(it.threadId)
         }
@@ -38,7 +43,7 @@ class GroupMessageApplication {
     /**
      * 移除线程
      */
-    fun removeThread(topicThreads: ArrayList<TopicThread>) {
+    fun removeThread(topicThreads: List<TopicThread>) {
         topicThreads.forEach {
             this.groupThreadManager[it.topic]?.remove(it.threadId)
         }
@@ -47,7 +52,7 @@ class GroupMessageApplication {
     /**
      * 更新线程超时时间
      */
-    fun updateThreadTimeout(topicThreads: ArrayList<TopicThread>) {
+    fun updateThreadTimeout(topicThreads: List<TopicThread>) {
         topicThreads.forEach {
             this.groupThreadManager[it.topic]?.updateTimeout(it.threadId)
         }

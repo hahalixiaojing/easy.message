@@ -24,7 +24,7 @@ class GroupMessageServer {
     /**
      * 添加线程
      */
-    fun addThread(applicationName: String, topicThreads: ArrayList<TopicThread>) {
+    fun addThread(applicationName: String, topicThreads: List<TopicThread>) {
 
         this.application[applicationName]?.addThread(topicThreads)
     }
@@ -40,7 +40,7 @@ class GroupMessageServer {
     /**
      * 更新线程超时时间
      */
-    fun updateThreadTimeout(applicationName: String, topicThreads: ArrayList<TopicThread>) {
+    fun updateThreadTimeout(applicationName: String, topicThreads: List<TopicThread>) {
 
         this.application[applicationName]?.updateThreadTimeout(topicThreads)
     }
@@ -51,6 +51,7 @@ class GroupMessageServer {
     fun getOffset(applicationName: String, topic: List<String>): List<TopicGroupOffset> {
         return this.application[applicationName]?.getOffset(topic) ?: emptyList()
     }
+
 
     /**
      * 获得线程和分组关系

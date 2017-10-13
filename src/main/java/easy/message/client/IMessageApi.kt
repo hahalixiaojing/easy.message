@@ -1,5 +1,7 @@
 package easy.message.client
 
+import easy.message.client.model.*
+
 interface IMessageApi {
 
     fun registerThread(app: String, threadInfo: TopicThreadInfo): TopicThreadGroupInfo

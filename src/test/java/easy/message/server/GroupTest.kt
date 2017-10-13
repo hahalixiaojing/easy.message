@@ -1,6 +1,6 @@
 package easy.message.server
 
-import easy.message.client.Event
+import easy.message.client.model.Event
 import easy.message.client.IEventHandler
 import easy.message.client.TopicClientManager
 import org.junit.Test

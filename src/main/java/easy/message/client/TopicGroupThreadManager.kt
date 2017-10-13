@@ -1,7 +1,7 @@
 package easy.message.client
 
-import com.alibaba.fastjson.JSON
 import easy.message.GroupThreadInfo
+import easy.message.client.model.*
 import org.apache.commons.lang3.StringUtils
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue

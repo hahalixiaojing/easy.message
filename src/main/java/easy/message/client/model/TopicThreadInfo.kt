@@ -1,10 +1,9 @@
-package easy.message.client
+package easy.message.client.model
 
-class TopicOffsetInfo {
-
-    constructor(topic: String, offset: Map<Int, Long>) {
+class TopicThreadInfo {
+    constructor(topic: String, threadIds: List<String>) {
         this.topic = topic
-        this.offset = offset
+        this.threadIds = threadIds
     }
 
     var topic: String
@@ -12,7 +11,7 @@ class TopicOffsetInfo {
         private set(value) {
             field = value
         }
-    var offset: Map<Int, Long>
+    var threadIds: List<String>
         get() = field
         private set(value) {
             field = value

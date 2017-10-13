@@ -2,6 +2,7 @@ package easy.message.server
 
 import easy.message.GroupThreadInfo
 import easy.message.client.*
+import easy.message.client.model.*
 import easy.message.server.model.Topic
 import easy.message.server.model.TopicThread
 import java.util.*

@@ -1,4 +1,4 @@
-package easy.message.client
+package easy.message.client.model
 
 class EventDataRequest {
 

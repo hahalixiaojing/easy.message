@@ -1,6 +1,9 @@
 package easy.message.client
 
 import com.alibaba.fastjson.JSON
+import easy.message.client.model.EventDataRequest
+import easy.message.client.model.TopicOffsetInfo
+import easy.message.client.model.TopicThreadInfo
 import java.util.concurrent.*
 
 class TopicClientManager {

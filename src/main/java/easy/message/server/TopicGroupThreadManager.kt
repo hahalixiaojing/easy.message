@@ -23,7 +23,7 @@ class TopicGroupThreadManager {
     constructor(topic: String, groupCount: Int) {
         this.topic = topic
         this.groupCount = groupCount
-        val scheduleAtFixedRate = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({
+        val scheduleAtFixedRate = Executors.newSingleThreadScheduledExecutor({ r -> Thread(r, "clear-died-thread") }).scheduleAtFixedRate({
 
             for ((key, value) in this.groupThread) {
                 val toEpochSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)

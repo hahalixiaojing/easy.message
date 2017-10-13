@@ -30,7 +30,7 @@ class TopicGroupThreadManager {
     //当前消息的分组offset由本地更新,其他消息分组通过获取服务端更新
     private val groupOffset = ConcurrentHashMap<Int, AtomicLong>()
     private val topicClientManager: TopicClientManager
-    private var sendGetEventThread = Executors.newSingleThreadScheduledExecutor()
+    private var sendGetEventThread = Executors.newSingleThreadScheduledExecutor({ r -> Thread(r, "add-data-request-thread") })
 
     constructor(topic: String, initThreadCount: Int = 4, eventHandler: IEventHandler, topicClientManager: TopicClientManager) {
         this.topic = topic
@@ -154,10 +154,6 @@ class TopicGroupThreadManager {
     fun getNextGroup(threadId: String): Int {
         val index = this.threadCurrentGroupIndex.getOrPut(threadId, { AtomicInteger(0) }).get()
         val groups = this.threadGroup[threadId]
-        //如果线程对应的消费分组为0
-//        if (groups!!.isEmpty()) {
-//            return -1
-//        }
         //如果下一个要消费分组索引位置大于或等于分组集合的size 则从第一个分组开始
         if (index + 1 >= groups!!.size) {
             this.threadCurrentGroupIndex[threadId]!!.set(0)
@@ -173,11 +169,10 @@ class TopicGroupThreadManager {
      */
     private fun createConsumerThread(): Thread {
         val thread = Thread({
-            while (this.staring) {
-                val eventList = ArrayList<Event>()
-                this.queue[Thread.currentThread().name]?.drainTo(eventList)
+            while (this.staring && !Thread.currentThread().isInterrupted) {
+                val event = this.queue[Thread.currentThread().name]?.take()
                 try {
-                    eventList.forEach {
+                    event?.let {
                         this.eventHandler.eventHandler(it)
                         this.groupOffset[it.groupId]!!.set(it.id) //记录消费offset
                     }

@@ -36,8 +36,7 @@ class ServerManager {
     /**
      * 移除线程
      */
-    fun removeThread(applicationName: String, topicThreads: ArrayList<TopicThread>) {
-
+    fun removeThread(applicationName: String, topicThreads: List<TopicThread>) {
         this.application[applicationName]?.removeThread(topicThreads)
     }
 

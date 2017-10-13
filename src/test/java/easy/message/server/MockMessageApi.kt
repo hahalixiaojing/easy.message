@@ -6,16 +6,26 @@ import easy.message.client.model.*
 import easy.message.server.model.Topic
 import easy.message.server.model.TopicThread
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 
 class MockMessageApi : IMessageApi {
+
 
     val groupserver: ServerManager
 
     constructor() {
-        val topic = Topic("topic", 2)
+        val topic = Topic("topic", 4)
         this.groupserver = ServerManager()
         this.groupserver.add("test", arrayListOf(topic))
+    }
+
+    override fun removeThread(app: String, topicThreadList: List<TopicThreadInfo>) {
+        topicThreadList.forEach {
+            s ->
+            val topicThreadArray = s.threadIds.map {
+                TopicThread(s.topic, it)
+            }
+            this.groupserver.removeThread(app, topicThreadArray)
+        }
     }
 
     override fun registerThread(app: String, threadInfo: TopicThreadInfo): TopicThreadGroupInfo {
@@ -42,10 +52,7 @@ class MockMessageApi : IMessageApi {
     }
 
     override fun selectNextEvents(eventDataRequest: EventDataRequest): List<Event> {
-        val array = ArrayBlockingQueue<Event>(1000)
-
-
-
+        Thread.sleep(100)
         return (1..2).map {
             Event(eventDataRequest.groupOffset + it * 1L, eventDataRequest.groupId, "event ${eventDataRequest.groupOffset + it}", Date().time)
         }

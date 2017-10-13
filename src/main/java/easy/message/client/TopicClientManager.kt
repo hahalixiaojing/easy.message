@@ -1,6 +1,5 @@
 package easy.message.client
 
-import com.alibaba.fastjson.JSON
 import easy.message.client.model.EventDataRequest
 import easy.message.client.model.TopicOffsetInfo
 import easy.message.client.model.TopicThreadInfo
@@ -13,8 +12,8 @@ class TopicClientManager {
     private val eventRequestQueue = ArrayBlockingQueue<EventDataRequest>(500)
     //key=topic
     private val groupThreadMap = ConcurrentHashMap<String, TopicGroupThreadManager>()
-    private var updateGroupOffsetThreadExecutor = Executors.newSingleThreadScheduledExecutor()
-    private var updateThreadExecutor = Executors.newSingleThreadScheduledExecutor()
+    private var updateGroupOffsetThreadExecutor = Executors.newSingleThreadScheduledExecutor({ r -> Thread(r, "update-group-offset-thread") })
+    private var updateThreadExecutor = Executors.newSingleThreadScheduledExecutor({ r -> Thread(r, "http-thread-status-thread") })
     private val eventDataExecutor: List<ScheduledExecutorService>
 
     constructor(applicationName: String, iMessageApi: IMessageApi) {
@@ -23,7 +22,7 @@ class TopicClientManager {
         //注册10个调http获取Event数据线程池
         this.eventDataExecutor = ArrayList<ScheduledExecutorService>()
         for (i in 1..10) {
-            this.eventDataExecutor.add(Executors.newSingleThreadScheduledExecutor())
+            this.eventDataExecutor.add(Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "http-request-thread") })
         }
     }
 
@@ -36,6 +35,13 @@ class TopicClientManager {
     }
 
     fun start() {
+        this.startTopic()
+        this.createUpdateGroupOffsetTask()
+        this.createUpdateThreadInfoTask()
+        this.createPullEventDataTask()
+    }
+
+    private fun startTopic() {
         //启动,向服务端注册线程信息、获取线程和Group分配信息、获取数据GROUP 最新offset值
         for ((key, value) in groupThreadMap) {
             val threadIds = value.getThreadIds()
@@ -44,6 +50,8 @@ class TopicClientManager {
 
             value.start(registerThread, topicOffset)
         }
+    }
+    private fun createPullEventDataTask() {
         //启动获得event数据定时任务数组
         val time = arrayOf(10, 10, 8, 8, 8, 4, 4, 3, 3, 2)
         for (index in 0 until this.eventDataExecutor.size) {
@@ -60,6 +68,8 @@ class TopicClientManager {
 
             }, 5, time[index].toLong(), TimeUnit.SECONDS)
         }
+    }
+    private fun createUpdateGroupOffsetTask() {
         //向服务器更新分组offset信息,同时返回最新offset信息,并刷新本offset信息
         this.updateGroupOffsetThreadExecutor.scheduleWithFixedDelay({
             val groupOffsetList = ArrayList<TopicOffsetInfo>()
@@ -72,8 +82,9 @@ class TopicClientManager {
                 this.groupThreadMap[it.topic]?.updateGroupOffset(it)
             }
 
-        }, 5, 3, TimeUnit.SECONDS)
-
+        }, 5, 5, TimeUnit.SECONDS)
+    }
+    private fun createUpdateThreadInfoTask() {
         //向服务器更新线程状态,并刷新本地线程信息,主要刷新线程和GROUP关系
         this.updateThreadExecutor.scheduleWithFixedDelay({
             val threadInfoList = ArrayList<TopicThreadInfo>()
@@ -90,15 +101,20 @@ class TopicClientManager {
     }
 
     fun addNextEventQuest(eventDataRequest: EventDataRequest) {
-//        java.util.concurrent.ConcurrentSkipListSet
-        println(JSON.toJSONString(eventDataRequest))
+        this.eventRequestQueue.add(eventDataRequest)
+    }
 
-        val count = this.eventRequestQueue.count { it.topic == eventDataRequest.topic && it.groupId == eventDataRequest.groupId }
-
-        if (count == 0) {
-            this.eventRequestQueue.add(eventDataRequest)
-        } else {
-//            println("addNextEventQuest $count > 0")
+    fun close() {
+        this.updateGroupOffsetThreadExecutor.shutdown()
+        this.updateThreadExecutor.shutdown()
+        this.updateGroupOffsetThreadExecutor.shutdown()
+        this.eventDataExecutor.forEach { it.shutdown() }
+        this.groupThreadMap.values.forEach {
+            it.close()
         }
+        val topicThreadList = this.groupThreadMap.map {
+            it.value.getThreadIds()
+        }
+        this.iMessageApi.removeThread(this.applicationName, topicThreadList)
     }
 }

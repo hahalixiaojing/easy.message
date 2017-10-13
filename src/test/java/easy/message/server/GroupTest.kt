@@ -17,10 +17,21 @@ class GroupTest {
 
         topicClientManager.regiserTopic("topic", object : IEventHandler {
             override fun eventHandler(event: Event) {
-                print("groupId = ${event.groupId},id=${event.id},data =${event.data}")
+                println("client = 2,threadId= ${Thread.currentThread().name},groupId = ${event.groupId},id=${event.id},data =${event.data}")
             }
         })
-
         topicClientManager.start()
+
+        Thread.sleep(20000)
+
+        val topicClientManager1 = TopicClientManager("test", mockApi)
+        topicClientManager1.regiserTopic("topic", object : IEventHandler {
+            override fun eventHandler(event: Event) {
+                println("client = 1,threadId= ${Thread.currentThread().name},groupId = ${event.groupId},id=${event.id},data =${event.data}")
+            }
+        })
+        topicClientManager1.start()
+
+        Thread.sleep(10000000)
     }
 }

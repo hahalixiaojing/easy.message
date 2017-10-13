@@ -1,5 +1,6 @@
 package easy.message.client
 
+import com.alibaba.fastjson.JSON
 import java.util.concurrent.*
 
 class TopicClientManager {
@@ -27,7 +28,7 @@ class TopicClientManager {
      * 注册topic
      */
     fun regiserTopic(topic: String, eventHandler: IEventHandler) {
-        val groupThreadManager = GroupThreadManager(topic, 4, eventHandler, this)
+        val groupThreadManager = GroupThreadManager(topic, 1, eventHandler, this)
         this.groupThreadMap.put(topic, groupThreadManager)
     }
 
@@ -86,6 +87,15 @@ class TopicClientManager {
     }
 
     fun addNextEventQuest(eventDataRequest: EventDataRequest) {
-        this.eventRequestQueue.add(eventDataRequest)
+//        java.util.concurrent.ConcurrentSkipListSet
+        println(JSON.toJSONString(eventDataRequest))
+
+        val count = this.eventRequestQueue.count { it.topic == eventDataRequest.topic && it.groupId == eventDataRequest.groupId }
+
+        if (count == 0) {
+            this.eventRequestQueue.add(eventDataRequest)
+        } else {
+//            println("addNextEventQuest $count > 0")
+        }
     }
 }

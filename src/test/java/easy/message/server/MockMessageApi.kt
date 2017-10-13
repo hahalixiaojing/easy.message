@@ -9,7 +9,7 @@ class MockMessageApi : IMessageApi {
     val groupserver: GroupMessageServer
 
     constructor() {
-        val topic = Topic("topic", 4)
+        val topic = Topic("topic", 2)
         this.groupserver = GroupMessageServer()
         this.groupserver.add("test", arrayListOf(topic))
     }
@@ -39,8 +39,8 @@ class MockMessageApi : IMessageApi {
 
     override fun selectNextEvents(eventDataRequest: EventDataRequest): List<Event> {
 
-        return (1..10).map {
-            Event(eventDataRequest.groupId + it * 1L, eventDataRequest.groupId, "event ${eventDataRequest.groupId + it}", Date().time)
+        return (1..2).map {
+            Event(eventDataRequest.groupOffset + it * 1L, eventDataRequest.groupId, "event ${eventDataRequest.groupOffset + it}", Date().time)
         }
     }
 

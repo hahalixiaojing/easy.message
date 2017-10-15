@@ -51,10 +51,10 @@ class MockMessageApi : IMessageApi {
         }
     }
 
-    override fun selectNextEvents(eventDataRequest: EventDataRequest): List<Event> {
+    override fun selectNextEvents(eventDataRequest: MessageDataRequest): List<Message> {
         Thread.sleep(100)
         return (1..2).map {
-            Event(eventDataRequest.groupOffset + it * 1L, eventDataRequest.groupId, "event ${eventDataRequest.groupOffset + it}", Date().time)
+            Message(eventDataRequest.groupOffset + it * 1L, eventDataRequest.groupId, "event ${eventDataRequest.groupOffset + it}", Date().time)
         }
     }
 

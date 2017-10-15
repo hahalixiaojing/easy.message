@@ -19,30 +19,30 @@ class TopicGroupThreadManager {
     private val topic: String
     private val initThreadCount: Int
     private val threads = ArrayList<Thread>() //线程集合
-    private val eventHandler: IEventHandler
+    private val messageHandler: IMessageHandler
     //key=threaId value= groupIds
     private val threadGroup = ConcurrentHashMap<String, ArrayList<Int>>() //记录当前线程可以消费的分组
     //key= threaId value=groupId的index
     private val threadCurrentGroupIndex = ConcurrentHashMap<String, AtomicInteger>() //记录当前线程消费的当前分组索引
     //key = threadId value=待消费的数据
-    private val queue = ConcurrentHashMap<String, ArrayBlockingQueue<Event>>()
+    private val queue = ConcurrentHashMap<String, ArrayBlockingQueue<Message>>()
     //groupoffset 存储当前topic下所有分组offset信息
     //当前消息的分组offset由本地更新,其他消息分组通过获取服务端更新
     private val groupOffset = ConcurrentHashMap<Int, AtomicLong>()
     private val topicClientManager: TopicClientManager
     private var sendGetEventThread = Executors.newSingleThreadScheduledExecutor({ r -> Thread(r, "add-data-request-thread") })
 
-    constructor(topic: String, initThreadCount: Int = 4, eventHandler: IEventHandler, topicClientManager: TopicClientManager) {
+    constructor(topic: String, initThreadCount: Int = 4, messageHandler: IMessageHandler, topicClientManager: TopicClientManager) {
         this.topic = topic
         this.initThreadCount = initThreadCount
-        this.eventHandler = eventHandler
+        this.messageHandler = messageHandler
         this.topicClientManager = topicClientManager
 
         for (i in 0 until this.initThreadCount) {
             this.threads.add(this.createConsumerThread())
         }
         this.threads.forEach {
-            this.queue[it.name] = ArrayBlockingQueue<Event>(1000)
+            this.queue[it.name] = ArrayBlockingQueue<Message>(1000)
         }
         sendGetEventThread.scheduleWithFixedDelay({
             this.threadGroup.forEach({
@@ -138,12 +138,12 @@ class TopicGroupThreadManager {
     /**
      * 将待消费的数据加入到队列
      */
-    fun addEvent(groupId: Int, eventList: List<Event>) {
+    fun addEvent(groupId: Int, messageList: List<Message>) {
 
         val threadId = this.getThreadIdByGroupId(groupId) ?: ""
         if (StringUtils.isNotBlank(threadId)) {
-            if (eventList.isNotEmpty()) {
-                this.queue[threadId]?.addAll(eventList)
+            if (messageList.isNotEmpty()) {
+                this.queue[threadId]?.addAll(messageList)
             }
         }
     }
@@ -173,7 +173,7 @@ class TopicGroupThreadManager {
                 val event = this.queue[Thread.currentThread().name]?.take()
                 try {
                     event?.let {
-                        this.eventHandler.eventHandler(it)
+                        this.messageHandler.onMessage(it)
                         this.groupOffset[it.groupId]!!.set(it.id) //记录消费offset
                     }
                 } catch (e: Exception) {
@@ -208,6 +208,6 @@ class TopicGroupThreadManager {
     private fun addRequestEventDataMessage(threadId: String) {
         val nextGroup = this.getNextGroup(threadId)
         val nextGroupOffset = this.groupOffset[nextGroup]!!.get()
-        this.topicClientManager.addNextEventQuest(EventDataRequest(nextGroup, nextGroupOffset, topic))
+        this.topicClientManager.addNextEventQuest(MessageDataRequest(nextGroup, nextGroupOffset, topic))
     }
 }

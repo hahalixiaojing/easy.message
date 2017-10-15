@@ -1,24 +1,30 @@
 package easy.message.client.model
 
-class EventDataRequest {
+class Message {
 
-    constructor(groupId: Int, groupOffset: Long, topic: String) {
+    constructor(id: Long, groupId: Int, text: String, timestamps: Long) {
+        this.id = id
         this.groupId = groupId
-        this.groupOffset = groupOffset
-        this.topic = topic
+        this.text = text
+        this.timestamps = timestamps
     }
 
+    var id: Long
+        get() = field
+        private set(value) {
+            field = value
+        }
     var groupId: Int
         get() = field
         private set(value) {
             field = value
         }
-    var groupOffset: Long
+    var text: String
         get() = field
         private set(value) {
             field = value
         }
-    var topic: String
+    var timestamps: Long
         get() = field
         private set(value) {
             field = value

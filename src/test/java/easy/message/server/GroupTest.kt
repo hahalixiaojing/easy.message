@@ -1,7 +1,7 @@
 package easy.message.server
 
-import easy.message.client.model.Event
-import easy.message.client.IEventHandler
+import easy.message.client.model.Message
+import easy.message.client.IMessageHandler
 import easy.message.client.TopicClientManager
 import org.junit.Test
 import java.util.concurrent.ArrayBlockingQueue
@@ -16,9 +16,9 @@ class GroupTest {
 
         val topicClientManager = TopicClientManager("test", mockApi)
 
-        topicClientManager.regiserTopic("topic", object : IEventHandler {
-            override fun eventHandler(event: Event) {
-                println("client = 2,threadId= ${Thread.currentThread().name},groupId = ${event.groupId},id=${event.id},data =${event.data}")
+        topicClientManager.regiserTopic("topic", object : IMessageHandler {
+            override fun onMessage(message: Message) {
+                println("client = 2,threadId= ${Thread.currentThread().name},groupId = ${message.groupId},id=${message.id},data =${message.text}")
             }
         })
         topicClientManager.start()
@@ -26,9 +26,9 @@ class GroupTest {
         Thread.sleep(20000)
 
         val topicClientManager1 = TopicClientManager("test", mockApi)
-        topicClientManager1.regiserTopic("topic", object : IEventHandler {
-            override fun eventHandler(event: Event) {
-                println("client = 1,threadId= ${Thread.currentThread().name},groupId = ${event.groupId},id=${event.id},data =${event.data}")
+        topicClientManager1.regiserTopic("topic", object : IMessageHandler {
+            override fun onMessage(message: Message) {
+                println("client = 1,threadId= ${Thread.currentThread().name},groupId = ${message.groupId},id=${message.id},data =${message.text}")
             }
         })
         topicClientManager1.start()

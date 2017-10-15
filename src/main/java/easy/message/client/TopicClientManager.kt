@@ -1,6 +1,6 @@
 package easy.message.client
 
-import easy.message.client.model.EventDataRequest
+import easy.message.client.model.MessageDataRequest
 import easy.message.client.model.TopicOffsetInfo
 import easy.message.client.model.TopicThreadInfo
 import java.util.concurrent.*
@@ -9,7 +9,7 @@ class TopicClientManager {
 
     private val iMessageApi: IMessageApi
     private val applicationName: String
-    private val eventRequestQueue = ArrayBlockingQueue<EventDataRequest>(500)
+    private val eventRequestQueue = ArrayBlockingQueue<MessageDataRequest>(500)
     //key=topic
     private val groupThreadMap = ConcurrentHashMap<String, TopicGroupThreadManager>()
     private var updateGroupOffsetThreadExecutor = Executors.newSingleThreadScheduledExecutor({ r -> Thread(r, "update-group-offset-thread") })
@@ -29,8 +29,8 @@ class TopicClientManager {
     /**
      * 注册topic
      */
-    fun regiserTopic(topic: String, eventHandler: IEventHandler) {
-        val groupThreadManager = TopicGroupThreadManager(topic, 1, eventHandler, this)
+    fun regiserTopic(topic: String, messageHandler: IMessageHandler) {
+        val groupThreadManager = TopicGroupThreadManager(topic, 1, messageHandler, this)
         this.groupThreadMap.put(topic, groupThreadManager)
     }
 
@@ -100,7 +100,7 @@ class TopicClientManager {
         }, 5, 10, TimeUnit.SECONDS)
     }
 
-    fun addNextEventQuest(eventDataRequest: EventDataRequest) {
+    fun addNextEventQuest(eventDataRequest: MessageDataRequest) {
         this.eventRequestQueue.add(eventDataRequest)
     }
 
